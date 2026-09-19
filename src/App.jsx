@@ -5,6 +5,8 @@ import "./App.css";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
+// ---------------- LANGUAGES ----------------
+
 const languages = [
   { name: "English", code: "en-IN", flag: "🇬🇧" },
   { name: "Hindi", code: "hi-IN", flag: "🇮🇳" },
@@ -19,107 +21,135 @@ const languages = [
   { name: "Odia", code: "or-IN", flag: "ଓ" },
 ];
 
+// ---------------- QUICK FEATURES ----------------
+
 const quickFeatures = [
   {
     icon: "📄",
     title: "Read Document",
-    description: "Read documents and understand important information.",
+    description:
+      "Read documents and understand important information.",
   },
   {
     icon: "📷",
     title: "What's Around Me?",
-    description: "Understand common objects, signs and surroundings.",
+    description:
+      "Understand common objects, signs and surroundings.",
   },
   {
     icon: "📝",
     title: "Smart Forms",
-    description: "Get voice guidance while filling forms.",
+    description:
+      "Get voice guidance while filling forms.",
   },
   {
     icon: "🎓",
     title: "Study Mode",
-    description: "Learn from PDFs, paragraphs and difficult words.",
+    description:
+      "Learn from PDFs, paragraphs and difficult words.",
   },
 ];
+
+// ---------------- FEATURES ----------------
 
 const features = [
   {
     icon: "🗣️",
     title: "Talk to Website",
-    text: "Speak naturally. VisionAssist can listen, understand and respond.",
+    text:
+      "Speak naturally. VisionAssist can listen, understand and respond.",
     tag: "VOICE FIRST",
   },
   {
     icon: "🌐",
     title: "Indian Languages",
-    text: "Choose the language that feels natural to you.",
+    text:
+      "Choose the language that feels natural to you.",
     tag: "11 LANGUAGES",
   },
   {
     icon: "📷",
     title: "Vision Assist",
-    text: "Understand everyday objects, signs, text and surroundings.",
+    text:
+      "Understand everyday objects, signs, text and surroundings.",
     tag: "CAMERA AI",
   },
   {
     icon: "📚",
     title: "Study Mode",
-    text: "Read, explain, summarize and ask questions about study material.",
+    text:
+      "Read, explain, summarize and ask questions about study material.",
     tag: "FOR STUDENTS",
   },
   {
     icon: "🧾",
     title: "Smart Forms",
-    text: "Get spoken guidance about fields and missing information.",
+    text:
+      "Get spoken guidance about fields and missing information.",
     tag: "FORM ASSIST",
   },
   {
     icon: "🛒",
     title: "Product Reader",
-    text: "Read packaging labels and basic product information.",
+    text:
+      "Read packaging labels and basic product information.",
     tag: "OCR",
   },
   {
     icon: "🔐",
     title: "Privacy Mode",
-    text: "Decide what you want to save, delete or keep private.",
+    text:
+      "Decide what you want to save, delete or keep private.",
     tag: "USER CONTROL",
   },
   {
     icon: "👨‍👩‍👧",
     title: "Trusted Helper",
-    text: "Share selected information with a trusted person when you choose.",
+    text:
+      "Share selected information with a trusted person when you choose.",
     tag: "HUMAN FALLBACK",
   },
 ];
 
 function App() {
-  const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
+  // ---------------- STATES ----------------
+
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    languages[0]
+  );
+
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [response, setResponse] = useState("");
+
   const [largeText, setLargeText] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
 
   const [activeFeature, setActiveFeature] = useState(null);
 
+  // Document
   const [documentText, setDocumentText] = useState("");
   const [documentName, setDocumentName] = useState("");
-  const [isReadingDocument, setIsReadingDocument] = useState(false);
+  const [isReadingDocument, setIsReadingDocument] =
+    useState(false);
 
+  // Camera
   const [cameraActive, setCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState("");
   const [imageAnalysis, setImageAnalysis] = useState("");
 
+  // Smart Forms
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formMessage, setFormMessage] = useState("");
 
+  // Study
   const [studyText, setStudyText] = useState("");
   const [studyResult, setStudyResult] = useState("");
   const [studyFileName, setStudyFileName] = useState("");
 
+  // Refs
   const recognitionRef = useRef(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -128,23 +158,31 @@ function App() {
 
   // ---------------- SPEAK ----------------
 
-  const speak = (text) => {
-    if (!text || !("speechSynthesis" in window)) return;
+  const speak = (text, language = selectedLanguage) => {
+    if (!text || !("speechSynthesis" in window)) {
+      return;
+    }
 
     window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance =
+      new SpeechSynthesisUtterance(text);
 
-    utterance.lang = selectedLanguage.code;
+    utterance.lang = language.code;
     utterance.rate = 0.9;
     utterance.pitch = 1;
 
-    const voices = window.speechSynthesis.getVoices();
+    const voices =
+      window.speechSynthesis.getVoices();
 
     const matchingVoice = voices.find((voice) =>
       voice.lang
         .toLowerCase()
-        .startsWith(selectedLanguage.code.split("-")[0].toLowerCase())
+        .startsWith(
+          language.code
+            .split("-")[0]
+            .toLowerCase()
+        )
     );
 
     if (matchingVoice) {
@@ -154,7 +192,7 @@ function App() {
     window.speechSynthesis.speak(utterance);
   };
 
-  // ---------------- LANGUAGE ----------------
+  // ---------------- LANGUAGE CHANGE ----------------
 
   const handleLanguageChange = (event) => {
     const language = languages.find(
@@ -173,7 +211,7 @@ function App() {
     setResponse(message);
 
     setTimeout(() => {
-      speak(message);
+      speak(message, language);
     }, 100);
   };
 
@@ -181,7 +219,8 @@ function App() {
 
   const startListening = () => {
     const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       const message =
@@ -189,6 +228,7 @@ function App() {
 
       setResponse(message);
       speak(message);
+
       return;
     }
 
@@ -213,8 +253,13 @@ function App() {
       let finalText = "";
       let temporaryText = "";
 
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const text = event.results[i][0].transcript;
+      for (
+        let i = event.resultIndex;
+        i < event.results.length;
+        i++
+      ) {
+        const text =
+          event.results[i][0].transcript;
 
         if (event.results[i].isFinal) {
           finalText += text;
@@ -223,10 +268,13 @@ function App() {
         }
       }
 
-      setTranscript(finalText || temporaryText);
+      setTranscript(
+        finalText || temporaryText
+      );
 
       if (finalText) {
-        const reply = createResponse(finalText);
+        const reply =
+          createResponse(finalText);
 
         setResponse(reply);
 
@@ -237,11 +285,15 @@ function App() {
     };
 
     recognition.onerror = (event) => {
-      console.log("Speech recognition error:", event.error);
+      console.log(
+        "Speech recognition error:",
+        event.error
+      );
 
       setIsListening(false);
 
-      let message = "I couldn't hear that. Please try again.";
+      let message =
+        "I couldn't hear that. Please try again.";
 
       if (event.error === "not-allowed") {
         message =
@@ -261,14 +313,18 @@ function App() {
     try {
       recognition.start();
     } catch (error) {
-      console.error("Recognition start error:", error);
+      console.error(
+        "Recognition start error:",
+        error
+      );
     }
   };
 
   // ---------------- VOICE COMMAND RESPONSE ----------------
 
   const createResponse = (text) => {
-    const lowerText = text.toLowerCase();
+    const lowerText =
+      text.toLowerCase();
 
     if (
       lowerText.includes("hello") ||
@@ -322,6 +378,7 @@ function App() {
       lowerText.includes("दवा")
     ) {
       openFeature("product");
+
       return getTranslatedMessage(
         "Product Reader is ready. Point the camera at a product and capture a clear photo."
       );
@@ -339,8 +396,21 @@ function App() {
       );
     }
 
+    if (
+      lowerText.includes("language") ||
+      lowerText.includes("languages") ||
+      lowerText.includes("भाषा") ||
+      lowerText.includes("ਭਾਸ਼ਾ")
+    ) {
+      openFeature("languages");
+
+      return getTranslatedMessage(
+        "Indian Languages is ready. Choose the language you want to use."
+      );
+    }
+
     return getTranslatedMessage(
-      "I am ready to help. Try saying document, study, camera or form."
+      "I am ready to help. Try saying document, study, camera, form or language."
     );
   };
 
@@ -348,7 +418,8 @@ function App() {
 
   const getGreeting = () => {
     const greetings = {
-      "en-IN": "Hello! I'm VisionAssist. How can I help you?",
+      "en-IN":
+        "Hello! I'm VisionAssist. How can I help you?",
 
       "hi-IN":
         "नमस्ते! मैं VisionAssist हूँ। मैं आपकी कैसे मदद कर सकता हूँ?",
@@ -381,12 +452,17 @@ function App() {
         "ନମସ୍କାର! ମୁଁ VisionAssist। ମୁଁ ଆପଣଙ୍କୁ କିପରି ସାହାଯ୍ୟ କରିପାରିବି?",
     };
 
-    return greetings[selectedLanguage.code] || greetings["en-IN"];
+    return (
+      greetings[selectedLanguage.code] ||
+      greetings["en-IN"]
+    );
   };
 
   // ---------------- TRANSLATED MESSAGE ----------------
 
-  const getTranslatedMessage = (englishMessage) => {
+  const getTranslatedMessage = (
+    englishMessage
+  ) => {
     const translations = {
       "hi-IN":
         "यह सुविधा तैयार है। आगे हम इसमें और AI capabilities जोड़ेंगे.",
@@ -419,96 +495,140 @@ function App() {
         "ଏହି ସୁବିଧା ପ୍ରସ୍ତୁତ ଅଛି। ପରେ ଆମେ ଏଥିରେ ଅଧିକ AI capabilities ଯୋଗ କରିବୁ.",
     };
 
-    return translations[selectedLanguage.code] || englishMessage;
+    return (
+      translations[selectedLanguage.code] ||
+      englishMessage
+    );
   };
 
   // ---------------- OPEN FEATURES ----------------
 
   const openFeature = (feature) => {
-  stopCamera();
+    stopCamera();
 
-  setActiveFeature(feature);
+    setActiveFeature(feature);
 
-  if (feature === "document") {
-    const message =
-      "Document Reader opened. You can upload a PDF or text document.";
+    if (feature === "document") {
+      const message =
+        "Document Reader opened. You can upload a PDF or text document.";
 
-    setResponse(message);
-    speak(message);
-  }
+      setResponse(message);
+      speak(message);
+    }
 
-  if (feature === "camera") {
-    const message =
-      "Vision Mode opened. Camera assistance is ready.";
+    if (feature === "camera") {
+      const message =
+        "Vision Mode opened. Camera assistance is ready.";
 
-    setResponse(message);
-    speak(message);
+      setResponse(message);
+      speak(message);
 
-    setTimeout(() => {
-      startCamera();
-    }, 300);
-  }
+      setTimeout(() => {
+        startCamera();
+      }, 300);
+    }
 
-  if (feature === "forms") {
-    const message =
-      "Smart Forms opened. Voice guidance is ready.";
+    if (feature === "forms") {
+      const message =
+        "Smart Forms opened. Voice guidance is ready.";
 
-    setResponse(message);
-    speak(message);
-  }
+      setResponse(message);
+      speak(message);
+    }
 
-  if (feature === "study") {
-    const message =
-      "Study Mode opened. You can upload study material or paste text.";
+    if (feature === "study") {
+      const message =
+        "Study Mode opened. You can upload study material or paste text.";
 
-    setResponse(message);
-    speak(message);
-  }
+      setResponse(message);
+      speak(message);
+    }
 
-  if (feature === "product") {
-    const message =
-      "Product Reader opened. You can use the camera to read product information.";
+    if (feature === "product") {
+      const message =
+        "Product Reader opened. You can use the camera to read product information.";
 
-    setResponse(message);
-    speak(message);
+      setResponse(message);
+      speak(message);
 
-    setTimeout(() => {
-      startCamera();
-    }, 300);
-  }
+      setTimeout(() => {
+        startCamera();
+      }, 300);
+    }
 
-  if (feature === "privacy") {
-    const message =
-      "Privacy Mode opened. Your information stays under your control.";
+    if (feature === "privacy") {
+      const message =
+        "Privacy Mode opened. Your information stays under your control.";
 
-    setResponse(message);
-    speak(message);
-  }
+      setResponse(message);
+      speak(message);
+    }
 
-  if (feature === "helper") {
-    const message =
-      "Trusted Helper opened. You can choose what information to share with a trusted person.";
+    if (feature === "helper") {
+      const message =
+        "Trusted Helper opened. You can choose what information to share with a trusted person.";
 
-    setResponse(message);
-    speak(message);
-  }
-};
+      setResponse(message);
+      speak(message);
+    }
+
+    if (feature === "languages") {
+      const message =
+        "Indian Languages opened. Choose the language you want to use.";
+
+      setResponse(message);
+      speak(message);
+    }
+  };
 
   // ---------------- QUICK FEATURES ----------------
 
   const handleQuickFeature = (title) => {
-    if (title === "Read Document") openFeature("document");
-    else if (title === "What's Around Me?") openFeature("camera");
-    else if (title === "Smart Forms") openFeature("forms");
-    else if (title === "Study Mode") openFeature("study");
+    if (title === "Read Document") {
+      openFeature("document");
+    }
+
+    else if (title === "What's Around Me?") {
+      openFeature("camera");
+    }
+
+    else if (title === "Smart Forms") {
+      openFeature("forms");
+    }
+
+    else if (title === "Study Mode") {
+      openFeature("study");
+    }
+
     else if (title === "Talk to Website") {
-      const message = "Voice assistant is ready. Click Talk to VisionAssist and speak naturally.";
-      setResponse(message); speak(message);
-    } else if (title === "Vision Assist") openFeature("camera");
-    else if (title === "Product Reader") openFeature("product");
-    else if (title === "Privacy Mode") openFeature("privacy");
-    else if (title === "Trusted Helper") openFeature("helper");
+      const message =
+        "Voice assistant is ready. Click Talk to VisionAssist and speak naturally.";
+
+      setResponse(message);
+      speak(message);
+    }
+
+    else if (title === "Indian Languages") {
+      openFeature("languages");
+    }
+
+    else if (title === "Vision Assist") {
+      openFeature("camera");
+    }
+
+    else if (title === "Product Reader") {
+      openFeature("product");
+    }
+
+    else if (title === "Privacy Mode") {
+      openFeature("privacy");
+    }
+
+    else if (title === "Trusted Helper") {
+      openFeature("helper");
+    }
   };
+
   // ---------------- DOCUMENT READER ----------------
 
   const readPdf = async (file) => {
@@ -517,11 +637,13 @@ function App() {
     setDocumentName(file.name);
 
     try {
-      const arrayBuffer = await file.arrayBuffer();
+      const arrayBuffer =
+        await file.arrayBuffer();
 
-      const pdf = await pdfjsLib.getDocument({
-        data: arrayBuffer,
-      }).promise;
+      const pdf =
+        await pdfjsLib.getDocument({
+          data: arrayBuffer,
+        }).promise;
 
       let fullText = "";
 
@@ -530,15 +652,19 @@ function App() {
         pageNumber <= pdf.numPages;
         pageNumber++
       ) {
-        const page = await pdf.getPage(pageNumber);
+        const page =
+          await pdf.getPage(pageNumber);
 
-        const content = await page.getTextContent();
+        const content =
+          await page.getTextContent();
 
-        const pageText = content.items
-          .map((item) => item.str)
-          .join(" ");
+        const pageText =
+          content.items
+            .map((item) => item.str)
+            .join(" ");
 
-        fullText += `\n\nPage ${pageNumber}\n${pageText}`;
+        fullText +=
+          `\n\nPage ${pageNumber}\n${pageText}`;
       }
 
       if (!fullText.trim()) {
@@ -546,29 +672,40 @@ function App() {
           "No selectable text was found in this PDF. This may be a scanned document.";
       }
 
-      setDocumentText(fullText.trim());
+      setDocumentText(
+        fullText.trim()
+      );
 
-      const message = `Document loaded successfully. ${
-        pdf.numPages
-      } page${pdf.numPages > 1 ? "s" : ""} found.`;
+      const message =
+        `Document loaded successfully. ${pdf.numPages} page${
+          pdf.numPages > 1 ? "s" : ""
+        } found.`;
 
       setResponse(message);
       speak(message);
+
     } catch (error) {
-      console.error("PDF error:", error);
+      console.error(
+        "PDF error:",
+        error
+      );
 
       const message =
         "I could not read this document. Please try another PDF.";
 
       setResponse(message);
       speak(message);
+
     } finally {
       setIsReadingDocument(false);
     }
   };
 
-  const handleDocumentUpload = async (event) => {
-    const file = event.target.files?.[0];
+  const handleDocumentUpload = async (
+    event
+  ) => {
+    const file =
+      event.target.files?.[0];
 
     if (!file) return;
 
@@ -578,20 +715,28 @@ function App() {
       file.name.endsWith(".md")
     ) {
       try {
-        const text = await file.text();
+        const text =
+          await file.text();
 
         setDocumentName(file.name);
         setDocumentText(text);
 
-        const message = "Text document loaded successfully.";
+        const message =
+          "Text document loaded successfully.";
 
         setResponse(message);
         speak(message);
+
       } catch (error) {
         console.error(error);
 
-        setResponse("Could not read this text file.");
-        speak("Could not read this text file.");
+        setResponse(
+          "Could not read this text file."
+        );
+
+        speak(
+          "Could not read this text file."
+        );
       }
 
       return;
@@ -599,7 +744,9 @@ function App() {
 
     if (
       file.type === "application/pdf" ||
-      file.name.toLowerCase().endsWith(".pdf")
+      file.name
+        .toLowerCase()
+        .endsWith(".pdf")
     ) {
       await readPdf(file);
       return;
@@ -614,39 +761,53 @@ function App() {
 
   const speakDocument = () => {
     if (!documentText) {
-      speak("Please upload a document first.");
+      speak(
+        "Please upload a document first."
+      );
       return;
     }
 
-    speak(documentText.slice(0, 5000));
+    speak(
+      documentText.slice(0, 5000)
+    );
   };
 
   // ---------------- CAMERA ----------------
 
   const startCamera = async () => {
-    if (!navigator.mediaDevices?.getUserMedia) {
+    if (
+      !navigator.mediaDevices?.getUserMedia
+    ) {
       const message =
         "Camera access is not supported by this browser.";
 
       setResponse(message);
       speak(message);
+
       return;
     }
 
     try {
       stopCamera();
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: false,
-      });
+      const stream =
+        await navigator.mediaDevices.getUserMedia(
+          {
+            video: true,
+            audio: false,
+          }
+        );
 
-      streamRef.current = stream;
+      streamRef.current =
+        stream;
 
       setCameraActive(true);
 
     } catch (error) {
-      console.error("Camera error:", error);
+      console.error(
+        "Camera error:",
+        error
+      );
 
       const message =
         "Camera permission was not available. Please allow camera access.";
@@ -658,21 +819,24 @@ function App() {
 
   const stopCamera = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => {
-        track.stop();
-      });
+      streamRef.current
+        .getTracks()
+        .forEach((track) => {
+          track.stop();
+        });
 
       streamRef.current = null;
     }
 
     if (videoRef.current) {
-      videoRef.current.srcObject = null;
+      videoRef.current.srcObject =
+        null;
     }
 
     setCameraActive(false);
   };
 
-  // ---------------- CONNECT CAMERA TO VIDEO ----------------
+  // ---------------- CONNECT CAMERA ----------------
 
   useEffect(() => {
     if (
@@ -680,17 +844,28 @@ function App() {
       videoRef.current &&
       streamRef.current
     ) {
-      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.srcObject =
+        streamRef.current;
 
-      videoRef.current.play().catch((error) => {
-        console.error("Video play error:", error);
-      });
+      videoRef.current
+        .play()
+        .catch((error) => {
+          console.error(
+            "Video play error:",
+            error
+          );
+        });
     }
   }, [cameraActive]);
 
-  // ---------------- CAPTURE PHOTO ----------------
+  // ---------------- IMAGE ANALYSIS ----------------
 
-  const analyzeImage = async (mode = activeFeature === "product" ? "product" : "vision") => {
+  const analyzeImage = async (
+    mode =
+      activeFeature === "product"
+        ? "product"
+        : "vision"
+  ) => {
     if (!capturedImage) {
       const message =
         mode === "product"
@@ -699,6 +874,7 @@ function App() {
 
       setImageAnalysis(message);
       speak(message);
+
       return;
     }
 
@@ -708,25 +884,36 @@ function App() {
           ? "Reading product information..."
           : "Analyzing image...";
 
-      setImageAnalysis(loadingMessage);
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/analyze-image`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            image: capturedImage,
-            mode,
-          }),
-        }
+      setImageAnalysis(
+        loadingMessage
       );
 
-      const data = await response.json();
+      const response =
+        await fetch(
+          `${
+            import.meta.env.VITE_API_URL ||
+            "http://localhost:5000"
+          }/api/analyze-image`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              image: capturedImage,
+              mode,
+            }),
+          }
+        );
 
-      console.log("Frontend received:", data);
+      const data =
+        await response.json();
+
+      console.log(
+        "Frontend received:",
+        data
+      );
 
       if (!response.ok) {
         throw new Error(
@@ -743,65 +930,115 @@ function App() {
           ? "I could not identify readable product information."
           : "No analysis received.");
 
-      setImageAnalysis(analysis);
+      setImageAnalysis(
+        analysis
+      );
+
       setResponse(analysis);
+
       speak(analysis);
+
     } catch (error) {
-      console.error("Image analysis error:", error);
+      console.error(
+        "Image analysis error:",
+        error
+      );
 
       const errorMessage =
         mode === "product"
           ? "Unable to read the product information. Please capture a clearer photo and try again."
           : "Unable to analyze the image. Please try again.";
 
-      setImageAnalysis(errorMessage);
-      setResponse(errorMessage);
+      setImageAnalysis(
+        errorMessage
+      );
+
+      setResponse(
+        errorMessage
+      );
+
       speak(errorMessage);
     }
   };
 
+  // ---------------- CAPTURE PHOTO ----------------
 
-const capturePhoto = () => {
-    const video = videoRef.current;
+  const capturePhoto = () => {
+    const video =
+      videoRef.current;
 
     if (!video || !cameraActive) {
-      speak("Please start the camera first.");
+      speak(
+        "Please start the camera first."
+      );
+
       return;
     }
 
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
+    const canvas =
+      document.createElement(
+        "canvas"
+      );
 
-    const context = canvas.getContext("2d");
+    canvas.width =
+      video.videoWidth || 640;
+
+    canvas.height =
+      video.videoHeight || 480;
+
+    const context =
+      canvas.getContext("2d");
+
     if (!context) {
-      speak("Could not capture the image.");
+      speak(
+        "Could not capture the image."
+      );
+
       return;
     }
 
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const image = canvas.toDataURL("image/jpeg", 0.9);
+    context.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    const image =
+      canvas.toDataURL(
+        "image/jpeg",
+        0.9
+      );
 
     setCapturedImage(image);
     setImageAnalysis("");
 
-    const message = activeFeature === "product"
-      ? "Product photo captured. Click Read Product to read the label."
-      : "Photo captured successfully. Click Analyze Image to analyze it.";
+    const message =
+      activeFeature === "product"
+        ? "Product photo captured. Click Read Product to read the label."
+        : "Photo captured successfully. Click Analyze Image to analyze it.";
 
     setResponse(message);
     speak(message);
   };
 
-
-// ---------------- SMART FORMS ----------------
+  // ---------------- SMART FORMS ----------------
 
   const checkForm = () => {
     const missing = [];
 
-    if (!formName.trim()) missing.push("Name");
-    if (!formEmail.trim()) missing.push("Email");
-    if (!formPhone.trim()) missing.push("Phone");
+    if (!formName.trim()) {
+      missing.push("Name");
+    }
+
+    if (!formEmail.trim()) {
+      missing.push("Email");
+    }
+
+    if (!formPhone.trim()) {
+      missing.push("Phone");
+    }
 
     if (missing.length === 0) {
       const message =
@@ -826,12 +1063,17 @@ const capturePhoto = () => {
 
   // ---------------- STUDY MODE ----------------
 
-  const handleStudyUpload = async (event) => {
-    const file = event.target.files?.[0];
+  const handleStudyUpload = async (
+    event
+  ) => {
+    const file =
+      event.target.files?.[0];
 
     if (!file) return;
 
-    setStudyFileName(file.name);
+    setStudyFileName(
+      file.name
+    );
 
     if (
       file.type === "text/plain" ||
@@ -839,7 +1081,8 @@ const capturePhoto = () => {
       file.name.endsWith(".md")
     ) {
       try {
-        const text = await file.text();
+        const text =
+          await file.text();
 
         setStudyText(text);
 
@@ -848,11 +1091,17 @@ const capturePhoto = () => {
 
         setResponse(message);
         speak(message);
+
       } catch (error) {
         console.error(error);
 
-        setResponse("Could not read the study file.");
-        speak("Could not read the study file.");
+        setResponse(
+          "Could not read the study file."
+        );
+
+        speak(
+          "Could not read the study file."
+        );
       }
 
       return;
@@ -860,14 +1109,18 @@ const capturePhoto = () => {
 
     if (
       file.type === "application/pdf" ||
-      file.name.toLowerCase().endsWith(".pdf")
+      file.name
+        .toLowerCase()
+        .endsWith(".pdf")
     ) {
       try {
-        const arrayBuffer = await file.arrayBuffer();
+        const arrayBuffer =
+          await file.arrayBuffer();
 
-        const pdf = await pdfjsLib.getDocument({
-          data: arrayBuffer,
-        }).promise;
+        const pdf =
+          await pdfjsLib.getDocument({
+            data: arrayBuffer,
+          }).promise;
 
         let fullText = "";
 
@@ -876,14 +1129,21 @@ const capturePhoto = () => {
           pageNumber <= pdf.numPages;
           pageNumber++
         ) {
-          const page = await pdf.getPage(pageNumber);
+          const page =
+            await pdf.getPage(
+              pageNumber
+            );
 
           const content =
             await page.getTextContent();
 
-          const pageText = content.items
-            .map((item) => item.str)
-            .join(" ");
+          const pageText =
+            content.items
+              .map(
+                (item) =>
+                  item.str
+              )
+              .join(" ");
 
           fullText +=
             "\n\n" +
@@ -891,15 +1151,21 @@ const capturePhoto = () => {
             pageText;
         }
 
-        setStudyText(fullText.trim());
+        setStudyText(
+          fullText.trim()
+        );
 
         const message =
           "Study PDF loaded successfully.";
 
         setResponse(message);
         speak(message);
+
       } catch (error) {
-        console.error("Study PDF error:", error);
+        console.error(
+          "Study PDF error:",
+          error
+        );
 
         const message =
           "I could not read this study PDF.";
@@ -931,33 +1197,39 @@ const capturePhoto = () => {
       return;
     }
 
-    const cleanText = studyText
-      .replace(/\s+/g, " ")
-      .trim();
+    const cleanText =
+      studyText
+        .replace(/\s+/g, " ")
+        .trim();
 
-    const sentences = cleanText
-      .split(/[.!?]\s+/)
-      .filter(Boolean);
+    const sentences =
+      cleanText
+        .split(/[.!?]\s+/)
+        .filter(Boolean);
 
-    const summary = sentences
-      .slice(0, 5)
-      .join(". ");
+    const summary =
+      sentences
+        .slice(0, 5)
+        .join(". ");
 
     const result =
       summary +
-      (summary.endsWith(".") ? "" : ".") +
+      (summary.endsWith(".")
+        ? ""
+        : ".") +
       "\n\nThis is a basic local summary. AI-powered summarization can be connected next.";
 
     setStudyResult(result);
 
-    speak(result.slice(0, 2500));
+    speak(
+      result.slice(0, 2500)
+    );
   };
 
   // ---------------- CLOSE FEATURE ----------------
 
   const closeFeature = () => {
     stopCamera();
-
     setActiveFeature(null);
   };
 
@@ -974,9 +1246,11 @@ const capturePhoto = () => {
       recognitionRef.current?.stop();
 
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => {
-          track.stop();
-        });
+        streamRef.current
+          .getTracks()
+          .forEach((track) => {
+            track.stop();
+          });
 
         streamRef.current = null;
       }
@@ -989,44 +1263,78 @@ const capturePhoto = () => {
 
   return (
     <div
-      className={`app ${largeText ? "large-text" : ""} ${
-        highContrast ? "high-contrast" : ""
+      className={`app ${
+        largeText ? "large-text" : ""
+      } ${
+        highContrast
+          ? "high-contrast"
+          : ""
       }`}
     >
       {/* NAVBAR */}
 
       <header className="navbar">
-        <a href="#" className="brand">
-          <div className="brand-icon">◉</div>
+        <a
+          href="#"
+          className="brand"
+        >
+          <div className="brand-icon">
+            ◉
+          </div>
 
           <div>
-            <h1>VisionAssist</h1>
-            <span>Accessibility 2.0</span>
+            <h1>
+              VisionAssist
+            </h1>
+
+            <span>
+              Accessibility 2.0
+            </span>
           </div>
         </a>
 
         <nav>
-          <a href="#features">Features</a>
-          <a href="#accessibility">Accessibility</a>
-          <a href="#privacy">Privacy</a>
+          <a href="#features">
+            Features
+          </a>
+
+          <a href="#accessibility">
+            Accessibility
+          </a>
+
+          <a href="#privacy">
+            Privacy
+          </a>
         </nav>
 
         <div className="language">
-          <span>{selectedLanguage.flag}</span>
+          <span>
+            {selectedLanguage.flag}
+          </span>
 
           <select
-            value={selectedLanguage.code}
-            onChange={handleLanguageChange}
+            value={
+              selectedLanguage.code
+            }
+            onChange={
+              handleLanguageChange
+            }
             aria-label="Choose language"
           >
-            {languages.map((language) => (
-              <option
-                key={language.code}
-                value={language.code}
-              >
-                {language.name}
-              </option>
-            ))}
+            {languages.map(
+              (language) => (
+                <option
+                  key={
+                    language.code
+                  }
+                  value={
+                    language.code
+                  }
+                >
+                  {language.name}
+                </option>
+              )
+            )}
           </select>
         </div>
       </header>
@@ -1044,24 +1352,35 @@ const capturePhoto = () => {
             <h2>
               Understand
               <br />
-              <span>more.</span>
+              <span>
+                more.
+              </span>
             </h2>
 
             <p className="hero-description">
-              A voice-first AI companion designed to help you read,
-              learn, understand and navigate digital information in
-              your language.
+              A voice-first AI companion
+              designed to help you read,
+              learn, understand and
+              navigate digital
+              information in your
+              language.
             </p>
 
             <div className="hero-actions">
               <button
                 className={`talk-button ${
-                  isListening ? "active" : ""
+                  isListening
+                    ? "active"
+                    : ""
                 }`}
-                onClick={startListening}
+                onClick={
+                  startListening
+                }
               >
                 <span className="mic">
-                  {isListening ? "🔴" : "🎙️"}
+                  {isListening
+                    ? "🔴"
+                    : "🎙️"}
                 </span>
 
                 {isListening
@@ -1080,13 +1399,19 @@ const capturePhoto = () => {
 
             <p className="language-note">
               <span>✓</span>
-              Speaking in {selectedLanguage.name}
+              Speaking in{" "}
+              {selectedLanguage.name}
             </p>
 
             {transcript && (
               <div className="voice-result">
-                <small>You said</small>
-                <p>{transcript}</p>
+                <small>
+                  You said
+                </small>
+
+                <p>
+                  {transcript}
+                </p>
               </div>
             )}
 
@@ -1097,9 +1422,15 @@ const capturePhoto = () => {
                   VisionAssist
                 </div>
 
-                <p>{response}</p>
+                <p>
+                  {response}
+                </p>
 
-                <button onClick={stopSpeaking}>
+                <button
+                  onClick={
+                    stopSpeaking
+                  }
+                >
                   🔇 Stop voice
                 </button>
               </div>
@@ -1115,12 +1446,16 @@ const capturePhoto = () => {
 
             <div
               className={`voice-orb ${
-                isListening ? "orb-active" : ""
+                isListening
+                  ? "orb-active"
+                  : ""
               }`}
             >
               <div className="orb-core">
                 <span>
-                  {isListening ? "◉" : "✦"}
+                  {isListening
+                    ? "◉"
+                    : "✦"}
                 </span>
               </div>
             </div>
@@ -1139,7 +1474,9 @@ const capturePhoto = () => {
 
         <section className="quick-section">
           <div className="section-heading">
-            <span>START HERE</span>
+            <span>
+              START HERE
+            </span>
 
             <h3>
               What would you like to do?
@@ -1147,25 +1484,34 @@ const capturePhoto = () => {
           </div>
 
           <div className="quick-grid">
-            {quickFeatures.map((item) => (
-              <button
-                className="quick-card"
-                key={item.title}
-                onClick={() =>
-                  handleQuickFeature(item.title)
-                }
-              >
-                <div>
-                  <strong>
-                    {item.icon} {item.title}
-                  </strong>
+            {quickFeatures.map(
+              (item) => (
+                <button
+                  className="quick-card"
+                  key={item.title}
+                  onClick={() =>
+                    handleQuickFeature(
+                      item.title
+                    )
+                  }
+                >
+                  <div>
+                    <strong>
+                      {item.icon}{" "}
+                      {item.title}
+                    </strong>
 
-                  <p>{item.description}</p>
-                </div>
+                    <p>
+                      {item.description}
+                    </p>
+                  </div>
 
-                <span className="arrow">↗</span>
-              </button>
-            ))}
+                  <span className="arrow">
+                    ↗
+                  </span>
+                </button>
+              )
+            )}
           </div>
         </section>
 
@@ -1179,19 +1525,26 @@ const capturePhoto = () => {
             <span>BUILT FOR REAL LIFE</span>
 
             <h3>
-              One assistant. Many possibilities.
+              One assistant. Many
+              possibilities.
             </h3>
           </div>
 
           <div className="feature-grid">
             {features.map((feature, index) => (
               <article
-  className={`feature-card ${
-    index === 0 ? "featured" : ""
-  }`}
-  key={feature.title}
-  onClick={() => handleQuickFeature(feature.title)}
->
+                className={`feature-card ${
+                  index === 0 ? "featured" : ""
+                }`}
+                key={feature.title}
+                onClick={() => {
+  if (index === 1) {
+    setActiveFeature("languages");
+  } else {
+    handleQuickFeature(feature.title);
+  }
+}}
+              >
                 <span className="feature-number">
                   0{index + 1}
                 </span>
@@ -1226,58 +1579,81 @@ const capturePhoto = () => {
             <h3>
               Your settings.
               <br />
-              <span>Your way.</span>
+              <span>
+                Your way.
+              </span>
             </h3>
 
             <p>
-              VisionAssist remembers accessibility
-              preferences so users can interact with the
-              experience in a way that feels comfortable.
+              VisionAssist remembers
+              accessibility preferences
+              so users can interact with
+              the experience in a way that
+              feels comfortable.
             </p>
           </div>
 
           <div className="accessibility-controls">
             <button
               className={`setting ${
-                largeText ? "selected" : ""
+                largeText
+                  ? "selected"
+                  : ""
               }`}
               onClick={() =>
-                setLargeText(!largeText)
+                setLargeText(
+                  !largeText
+                )
               }
             >
               <span>🔠</span>
 
               <div>
-                <strong>Large Text</strong>
+                <strong>
+                  Large Text
+                </strong>
+
                 <small>
-                  Increase interface text size
+                  Increase interface text
+                  size
                 </small>
               </div>
 
               <i>
-                {largeText ? "ON" : "OFF"}
+                {largeText
+                  ? "ON"
+                  : "OFF"}
               </i>
             </button>
 
             <button
               className={`setting ${
-                highContrast ? "selected" : ""
+                highContrast
+                  ? "selected"
+                  : ""
               }`}
               onClick={() =>
-                setHighContrast(!highContrast)
+                setHighContrast(
+                  !highContrast
+                )
               }
             >
               <span>◐</span>
 
               <div>
-                <strong>High Contrast</strong>
+                <strong>
+                  High Contrast
+                </strong>
+
                 <small>
                   Improve visual contrast
                 </small>
               </div>
 
               <i>
-                {highContrast ? "ON" : "OFF"}
+                {highContrast
+                  ? "ON"
+                  : "OFF"}
               </i>
             </button>
 
@@ -1289,7 +1665,9 @@ const capturePhoto = () => {
                 const message =
                   "Slow voice mode is ready. VisionAssist uses a comfortable speaking speed.";
 
-                setResponse(message);
+                setResponse(
+                  message
+                );
 
                 speak(message);
               }}
@@ -1297,13 +1675,18 @@ const capturePhoto = () => {
               <span>🐢</span>
 
               <div>
-                <strong>Slow Voice</strong>
+                <strong>
+                  Slow Voice
+                </strong>
+
                 <small>
                   Comfortable speech speed
                 </small>
               </div>
 
-              <i>READY</i>
+              <i>
+                READY
+              </i>
             </button>
           </div>
         </section>
@@ -1314,7 +1697,9 @@ const capturePhoto = () => {
           className="trust-section"
           id="privacy"
         >
-          <div className="trust-icon">🔐</div>
+          <div className="trust-icon">
+            🔐
+          </div>
 
           <div>
             <div className="section-label">
@@ -1322,24 +1707,33 @@ const capturePhoto = () => {
             </div>
 
             <h3>
-              Assistance with transparency.
+              Assistance with
+              transparency.
             </h3>
 
             <p>
-              VisionAssist is designed to communicate
-              uncertainty instead of pretending to know
-              everything. When AI is unsure, users can
-              choose another way to verify information.
+              VisionAssist is designed to
+              communicate uncertainty
+              instead of pretending to
+              know everything. When AI is
+              unsure, users can choose
+              another way to verify
+              information.
             </p>
           </div>
 
           <div className="uncertain">
-            <span>AI UNCERTAINTY</span>
+            <span>
+              AI UNCERTAINTY
+            </span>
 
-            <strong>“I'm not sure.”</strong>
+            <strong>
+              “I'm not sure.”
+            </strong>
 
             <small>
-              Human / trusted helper fallback
+              Human / trusted helper
+              fallback
             </small>
           </div>
         </section>
@@ -1350,7 +1744,9 @@ const capturePhoto = () => {
       {activeFeature && (
         <div
           className="feature-overlay"
-          onClick={closeFeature}
+          onClick={
+            closeFeature
+          }
         >
           <div
             className="feature-modal"
@@ -1360,30 +1756,42 @@ const capturePhoto = () => {
           >
             <button
               className="close-feature"
-              onClick={closeFeature}
+              onClick={
+                closeFeature
+              }
             >
               ✕
             </button>
 
             {/* DOCUMENT */}
 
-            {activeFeature === "document" && (
+            {activeFeature ===
+              "document" && (
               <div className="feature-panel">
-                <div className="panel-icon">📄</div>
+                <div className="panel-icon">
+                  📄
+                </div>
 
-                <h2>Document Reader</h2>
+                <h2>
+                  Document Reader
+                </h2>
 
                 <p>
-                  Upload a PDF or text document and
-                  VisionAssist will extract the readable
-                  text.
+                  Upload a PDF or text
+                  document and
+                  VisionAssist will extract
+                  the readable text.
                 </p>
 
                 <input
-                  ref={documentInputRef}
+                  ref={
+                    documentInputRef
+                  }
                   type="file"
                   accept=".pdf,.txt,.md,application/pdf,text/plain"
-                  onChange={handleDocumentUpload}
+                  onChange={
+                    handleDocumentUpload
+                  }
                   hidden
                 />
 
@@ -1404,7 +1812,8 @@ const capturePhoto = () => {
 
                 {documentName && (
                   <div className="file-name">
-                    📎 {documentName}
+                    📎{" "}
+                    {documentName}
                   </div>
                 )}
 
@@ -1416,13 +1825,17 @@ const capturePhoto = () => {
                       </strong>
 
                       <button
-                        onClick={speakDocument}
+                        onClick={
+                          speakDocument
+                        }
                       >
                         🔊 Read Aloud
                       </button>
                     </div>
 
-                    <p>{documentText}</p>
+                    <p>
+                      {documentText}
+                    </p>
                   </div>
                 )}
               </div>
@@ -1430,37 +1843,73 @@ const capturePhoto = () => {
 
             {/* PRODUCT READER */}
 
-            {activeFeature === "product" && (
+            {activeFeature ===
+              "product" && (
               <div className="feature-panel">
-                <div className="panel-icon">🛒</div>
-                <h2>Product Reader</h2>
+                <div className="panel-icon">
+                  🛒
+                </div>
+
+                <h2>
+                  Product Reader
+                </h2>
+
                 <p>
-                  Point the camera at a medicine bottle, food package,
-                  cosmetic or other product. VisionAssist will read
-                  visible product information without guessing.
+                  Point the camera at a
+                  medicine bottle, food
+                  package, cosmetic or
+                  other product.
+                  VisionAssist will read
+                  visible product
+                  information without
+                  guessing.
                 </p>
 
                 <div className="camera-box">
                   {cameraActive ? (
-                    <video ref={videoRef} autoPlay playsInline muted />
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                    />
                   ) : (
                     <div className="camera-placeholder">
-                      🛒<span>Camera is off</span>
+                      🛒
+                      <span>
+                        Camera is off
+                      </span>
                     </div>
                   )}
                 </div>
 
                 <div className="panel-actions">
                   {!cameraActive ? (
-                    <button className="panel-button" onClick={startCamera}>
+                    <button
+                      className="panel-button"
+                      onClick={
+                        startCamera
+                      }
+                    >
                       📷 Start Product Camera
                     </button>
                   ) : (
                     <>
-                      <button className="panel-button" onClick={capturePhoto}>
+                      <button
+                        className="panel-button"
+                        onClick={
+                          capturePhoto
+                        }
+                      >
                         📸 Capture Product
                       </button>
-                      <button className="panel-secondary" onClick={stopCamera}>
+
+                      <button
+                        className="panel-secondary"
+                        onClick={
+                          stopCamera
+                        }
+                      >
                         Stop Camera
                       </button>
                     </>
@@ -1469,22 +1918,46 @@ const capturePhoto = () => {
 
                 {capturedImage && (
                   <div className="captured-box">
-                    <h4>📦 Captured Product</h4>
-                    <img src={capturedImage} alt="Captured product" />
+                    <h4>
+                      📦 Captured Product
+                    </h4>
+
+                    <img
+                      src={
+                        capturedImage
+                      }
+                      alt="Captured product"
+                    />
+
                     <button
                       className="panel-button"
-                      onClick={() => analyzeImage("product")}
+                      onClick={() =>
+                        analyzeImage(
+                          "product"
+                        )
+                      }
                     >
                       🔍 Read Product
                     </button>
 
                     {imageAnalysis && (
                       <div className="image-analysis-result">
-                        <h4>🛒 Product Information</h4>
-                        <p>{imageAnalysis}</p>
+                        <h4>
+                          🛒 Product
+                          Information
+                        </h4>
+
+                        <p>
+                          {imageAnalysis}
+                        </p>
+
                         <button
                           className="panel-secondary"
-                          onClick={() => speak(imageAnalysis)}
+                          onClick={() =>
+                            speak(
+                              imageAnalysis
+                            )
+                          }
                         >
                           🔊 Read Information
                         </button>
@@ -1497,24 +1970,51 @@ const capturePhoto = () => {
 
             {/* PRIVACY MODE */}
 
-            {activeFeature === "privacy" && (
+            {activeFeature ===
+              "privacy" && (
               <div className="feature-panel">
-                <div className="panel-icon">🔐</div>
-                <h2>Privacy Mode</h2>
+                <div className="panel-icon">
+                  🔐
+                </div>
+
+                <h2>
+                  Privacy Mode
+                </h2>
+
                 <p>
-                  You control temporary information in this demo. You can
-                  clear captured images and generated results at any time.
+                  You control temporary
+                  information in this demo.
+                  You can clear captured
+                  images and generated
+                  results at any time.
                 </p>
+
                 <button
                   className="panel-secondary"
                   onClick={() => {
-                    setCapturedImage("");
-                    setImageAnalysis("");
-                    setDocumentText("");
+                    setCapturedImage(
+                      ""
+                    );
+
+                    setImageAnalysis(
+                      ""
+                    );
+
+                    setDocumentText(
+                      ""
+                    );
+
                     setStudyText("");
+
                     setStudyResult("");
-                    setResponse("Temporary information has been cleared.");
-                    speak("Temporary information has been cleared.");
+
+                    setResponse(
+                      "Temporary information has been cleared."
+                    );
+
+                    speak(
+                      "Temporary information has been cleared."
+                    );
                   }}
                 >
                   🗑️ Delete Temporary Data
@@ -1524,19 +2024,35 @@ const capturePhoto = () => {
 
             {/* TRUSTED HELPER */}
 
-            {activeFeature === "helper" && (
+            {activeFeature ===
+              "helper" && (
               <div className="feature-panel">
-                <div className="panel-icon">👨‍👩‍👧</div>
-                <h2>Trusted Helper</h2>
+                <div className="panel-icon">
+                  👨‍👩‍👧
+                </div>
+
+                <h2>
+                  Trusted Helper
+                </h2>
+
                 <p>
-                  Trusted Helper is a human fallback concept. Review the
-                  information yourself before sharing anything with another person.
+                  Trusted Helper is a human
+                  fallback concept. Review
+                  the information yourself
+                  before sharing anything
+                  with another person.
                 </p>
+
                 <button
                   className="panel-button"
                   onClick={() => {
-                    const message = "Trusted Helper is ready. You can choose what information to share.";
-                    setResponse(message);
+                    const message =
+                      "Trusted Helper is ready. You can choose what information to share.";
+
+                    setResponse(
+                      message
+                    );
+
                     speak(message);
                   }}
                 >
@@ -1547,15 +2063,20 @@ const capturePhoto = () => {
 
             {/* CAMERA */}
 
-            {activeFeature === "camera" && (
+            {activeFeature ===
+              "camera" && (
               <div className="feature-panel">
-                <div className="panel-icon">📷</div>
+                <div className="panel-icon">
+                  📷
+                </div>
 
-                <h2>What's Around Me?</h2>
+                <h2>
+                  What's Around Me?
+                </h2>
 
                 <p>
-                  Use your camera to view your
-                  surroundings.
+                  Use your camera to view
+                  your surroundings.
                 </p>
 
                 <div className="camera-box">
@@ -1569,7 +2090,9 @@ const capturePhoto = () => {
                   ) : (
                     <div className="camera-placeholder">
                       📷
-                      <span>Camera is off</span>
+                      <span>
+                        Camera is off
+                      </span>
                     </div>
                   )}
                 </div>
@@ -1578,7 +2101,9 @@ const capturePhoto = () => {
                   {!cameraActive ? (
                     <button
                       className="panel-button"
-                      onClick={startCamera}
+                      onClick={
+                        startCamera
+                      }
                     >
                       📷 Start Camera
                     </button>
@@ -1586,16 +2111,18 @@ const capturePhoto = () => {
                     <>
                       <button
                         className="panel-button"
-                        onClick={capturePhoto}
+                        onClick={
+                          capturePhoto
+                        }
                       >
                         📸 Capture
                       </button>
 
-                
-
                       <button
                         className="panel-secondary"
-                        onClick={stopCamera}
+                        onClick={
+                          stopCamera
+                        }
                       >
                         Stop Camera
                       </button>
@@ -1605,30 +2132,42 @@ const capturePhoto = () => {
 
                 {capturedImage && (
                   <div className="captured-box">
-                    <h4>Captured Image</h4>
+                    <h4>
+                      Captured Image
+                    </h4>
 
                     <img
-                      src={capturedImage}
+                      src={
+                        capturedImage
+                      }
                       alt="Captured surroundings"
                     />
 
                     {!imageAnalysis && (
                       <p>
-                        Image captured successfully.
-                        Click "Analyze Image" to analyze
-                        it.
+                        Image captured
+                        successfully. Click
+                        "Analyze Image" to
+                        analyze it.
                       </p>
                     )}
+
                     <button
-  className="panel-secondary"
-  onClick={analyzeImage}
->
-  🔍 Analyze Image
-</button>
+                      className="panel-secondary"
+                      onClick={() =>
+                        analyzeImage(
+                          "vision"
+                        )
+                      }
+                    >
+                      🔍 Analyze Image
+                    </button>
 
                     {imageAnalysis && (
                       <div className="image-analysis-result">
-                        <h4>🤖 AI Analysis</h4>
+                        <h4>
+                          🤖 AI Analysis
+                        </h4>
 
                         <p>
                           {imageAnalysis}
@@ -1653,16 +2192,22 @@ const capturePhoto = () => {
 
             {/* SMART FORMS */}
 
-            {activeFeature === "forms" && (
+            {activeFeature ===
+              "forms" && (
               <div className="feature-panel">
-                <div className="panel-icon">📝</div>
+                <div className="panel-icon">
+                  📝
+                </div>
 
-                <h2>Smart Forms</h2>
+                <h2>
+                  Smart Forms
+                </h2>
 
                 <p>
-                  Fill the fields below. VisionAssist
-                  will tell you if an important field is
-                  missing.
+                  Fill the fields below.
+                  VisionAssist will tell
+                  you if an important field
+                  is missing.
                 </p>
 
                 <div className="smart-form">
@@ -1712,7 +2257,9 @@ const capturePhoto = () => {
 
                   <button
                     className="panel-button"
-                    onClick={checkForm}
+                    onClick={
+                      checkForm
+                    }
                   >
                     ✓ Check My Form
                   </button>
@@ -1728,22 +2275,32 @@ const capturePhoto = () => {
 
             {/* STUDY MODE */}
 
-            {activeFeature === "study" && (
+            {activeFeature ===
+              "study" && (
               <div className="feature-panel">
-                <div className="panel-icon">🎓</div>
+                <div className="panel-icon">
+                  🎓
+                </div>
 
-                <h2>Study Mode</h2>
+                <h2>
+                  Study Mode
+                </h2>
 
                 <p>
-                  Upload a study PDF/TXT file or paste
-                  your study material below.
+                  Upload a study PDF/TXT
+                  file or paste your study
+                  material below.
                 </p>
 
                 <input
-                  ref={studyInputRef}
+                  ref={
+                    studyInputRef
+                  }
                   type="file"
                   accept=".pdf,.txt,.md,application/pdf,text/plain"
-                  onChange={handleStudyUpload}
+                  onChange={
+                    handleStudyUpload
+                  }
                   hidden
                 />
 
@@ -1758,7 +2315,8 @@ const capturePhoto = () => {
 
                 {studyFileName && (
                   <div className="file-name">
-                    📎 {studyFileName}
+                    📎{" "}
+                    {studyFileName}
                   </div>
                 )}
 
@@ -1775,18 +2333,108 @@ const capturePhoto = () => {
 
                 <button
                   className="panel-button"
-                  onClick={createStudySummary}
+                  onClick={
+                    createStudySummary
+                  }
                 >
                   ✨ Create Summary
                 </button>
 
                 {studyResult && (
                   <div className="study-result">
-                    <h4>Study Summary</h4>
+                    <h4>
+                      Study Summary
+                    </h4>
 
-                    <p>{studyResult}</p>
+                    <p>
+                      {studyResult}
+                    </p>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* INDIAN LANGUAGES */}
+
+            {activeFeature ===
+              "languages" && (
+              <div className="feature-panel">
+                <div className="panel-icon">
+                  🌐
+                </div>
+
+                <h2>
+                  Indian Languages
+                </h2>
+
+                <p>
+                  Choose the language that
+                  feels natural to you.
+                  VisionAssist currently
+                  supports 11 languages.
+                </p>
+
+                <div className="language-options">
+                  {languages.map(
+                    (language) => (
+                      <button
+                        key={
+                          language.code
+                        }
+                        className={
+                          selectedLanguage.code ===
+                          language.code
+                            ? "language-option selected"
+                            : "language-option"
+                        }
+                        onClick={() => {
+                          setSelectedLanguage(
+                            language
+                          );
+
+                          const message =
+                            language.name ===
+                            "English"
+                              ? "English language selected."
+                              : `${language.name} language selected.`;
+
+                          setResponse(
+                            message
+                          );
+
+                          setTimeout(
+                            () => {
+                              speak(
+                                message,
+                                language
+                              );
+                            },
+                            100
+                          );
+                        }}
+                      >
+                        <span className="language-flag">
+                          {
+                            language.flag
+                          }
+                        </span>
+
+                        <span>
+                          {
+                            language.name
+                          }
+                        </span>
+
+                        {selectedLanguage.code ===
+                          language.code && (
+                          <span className="language-check">
+                            ✓
+                          </span>
+                        )}
+                      </button>
+                    )
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -1797,18 +2445,24 @@ const capturePhoto = () => {
 
       <footer>
         <div className="brand">
-          <div className="brand-icon">◉</div>
+          <div className="brand-icon">
+            ◉
+          </div>
 
           <div>
-            <strong>VisionAssist 2.0</strong>
+            <strong>
+              VisionAssist 2.0
+            </strong>
 
-            <span>Inclusive technology</span>
+            <span>
+              Inclusive technology
+            </span>
           </div>
         </div>
 
         <p>
-          Built for reading · learning · understanding ·
-          navigating
+          Built for reading · learning ·
+          understanding · navigating
         </p>
       </footer>
     </div>
