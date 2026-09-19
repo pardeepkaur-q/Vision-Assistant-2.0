@@ -1526,6 +1526,7 @@ function App() {
 
             <h3>
               One assistant. Many
+              <br />
               possibilities.
             </h3>
           </div>
